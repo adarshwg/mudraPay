@@ -1,8 +1,6 @@
 package org.example.DataAccess;
-
 import java.sql.*;
 import java.util.ArrayList;
-
 public class DataAccess {
 
     // Method to execute SELECT queries
