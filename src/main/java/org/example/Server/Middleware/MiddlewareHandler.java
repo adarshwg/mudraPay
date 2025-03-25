@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 public class MiddlewareHandler implements HttpHandler {
+    private final Gson gson = new Gson();
     public final HttpHandler nextHandler;
     public MiddlewareHandler(HttpHandler nextHandler){
         this.nextHandler=nextHandler;

@@ -84,7 +84,7 @@ public class UserService {
     }
 
     public void updatePassword(String username, String enteredPassword, String newPassword)
-            throws UserNotFoundException, SQLException, DatabaseException {
+            throws UserNotFoundException, SQLException, DatabaseException, InvalidCredentials {
 
         if (!Validators.checkPasswordFormat(newPassword)) {
             throw new IllegalArgumentException("Invalid password format.");
@@ -94,22 +94,27 @@ public class UserService {
                     "set password=?", "username=?", newPassword, username);
             System.out.println("Password updated successfully!");
         } else {
-            throw new SQLException("Incorrect current password!");
+            throw new InvalidCredentials("Incorrect current password!");
         }
     }
 
     public void updatePin(String username, String enteredPin, String newPin)
-            throws UserNotFoundException, SQLException, DatabaseException {
+            throws UserNotFoundException, SQLException, DatabaseException, InvalidCredentials {
+        System.out.println("came here aaaa");
+        System.out.println(enteredPin);
+        System.out.println(newPin);
         if (!Validators.checkPinFormat(newPin)) {
+            System.out.println("chck 111");
             throw new IllegalArgumentException("Invalid PIN format.");
         }
+        System.out.println("chck 1");
 
         if (verifyPin(username, enteredPin)) {
             DataAccess.executeUpdate(this.conn, "user", "update",
                     "set mudraPin=?", "username=?", newPin, username);
             System.out.println("Pin updated successfully!");
         } else {
-            throw new SQLException("Incorrect current pin!");
+            throw new InvalidCredentials("Incorrect current password!");
         }
     }
     public boolean verifyPin(String username, String enteredPin)

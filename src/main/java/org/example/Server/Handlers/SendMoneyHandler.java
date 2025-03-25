@@ -25,8 +25,8 @@ public class SendMoneyHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String username = (String) exchange.getAttribute("username");
         PaymentModel paymentDetails = getPaymentDetails(exchange);
-        String receiverName = paymentDetails.receiver;
-        int amount = paymentDetails.amount;
+        String receiverName = paymentDetails.receiver();
+        int amount = paymentDetails.amount();
         try {
             User user = userService.getUser(username);
             User receiver = userService.getUser(receiverName);
@@ -48,7 +48,6 @@ public class SendMoneyHandler implements HttpHandler {
         } catch (InvalidAmountException e) {
             ServerUtil.sendResponse(exchange,400,Map.of("BadRequest","Invalid amount entered!!"));
         }
-
     }
     public PaymentModel getPaymentDetails(HttpExchange exchange) throws IOException {
         String jsonString  = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);

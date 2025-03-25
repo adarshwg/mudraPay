@@ -20,12 +20,28 @@ public class ServerUtil {
 //            os.write(response.getBytes());
 //        }
 //    }
-    public static void sendResponse(HttpExchange exchange, int statusCode, Map<String, String> responseMap) throws IOException {
+public static void sendResponse(HttpExchange exchange, int statusCode, Map<String, String> responseMap) {
+    try (OutputStream os = exchange.getResponseBody()) {
         String jsonResponse = gson.toJson(responseMap);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(statusCode, jsonResponse.getBytes().length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(jsonResponse.getBytes());
+        os.write(jsonResponse.getBytes());
+    } catch (IOException e) {
+        // Fallback in case of IOException
+        try {
+            Map<String, String> errorResponse = Map.of("error", "Internal Server Error");
+            String errorJson = gson.toJson(errorResponse);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(500, errorJson.getBytes().length);
+
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(errorJson.getBytes());
+            }
+        } catch (IOException ex) {
+
+            ex.printStackTrace();
         }
     }
+}
+
 }
