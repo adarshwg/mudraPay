@@ -15,6 +15,11 @@ public class Exceptions {
             super(str);
         }
     }
+    public static class InvalidAmountException extends Exception{
+        public InvalidAmountException(String str){
+            super(str);
+        }
+    }
     public static class UserAlreadyExistsException extends Exception{
         public UserAlreadyExistsException(String str){
             super(str);

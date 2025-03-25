@@ -1,14 +1,13 @@
 package org.example.Server.Handlers;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.example.Server.ServerUtil;
 import org.example.Services.AuthService;
 import org.example.models.User;
 import org.example.utils.Exceptions.*;
 import org.example.utils.Token;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Map;
@@ -24,22 +23,22 @@ public class LoginHandler implements HttpHandler {
                 throw new IllegalArgumentException("Missing required fields");
             }
         }  catch (IllegalArgumentException e){
-            ResponseUtil.sendResponse(exchange,400,"BadRequest","Invalid or invalid username or password/pin format!");
+            ServerUtil.sendResponse(exchange,400,Map.of("BadRequest","Invalid or invalid username or password/pin format!"));
         }
         try {
             boolean isUserAuthenticated = authService.login(user);
             if(!isUserAuthenticated){
-                ResponseUtil.sendResponse(exchange,401,"Unauthenticated","Invalid credentials!!");
+                ServerUtil.sendResponse(exchange,401,Map.of("Unauthenticated","Invalid credentials!!"));
                 return;
             }
             String token = Token.generateToken(user.getUsername());
-            ResponseUtil.sendResponse(exchange,201,"token",token);
+            ServerUtil.sendResponse(exchange,201,Map.of("token",token));
         } catch (UserNotFoundException e) {
-            ResponseUtil.sendResponse(exchange,404,"NotFound","User not found!");
+            ServerUtil.sendResponse(exchange,404,Map.of("NotFound","User not found!"));
         } catch(IllegalArgumentException e){
-            ResponseUtil.sendResponse(exchange,400,"BadRequest","Invalid or invalid username or password/pin format!");
+            ServerUtil.sendResponse(exchange,400,Map.of("BadRequest","Invalid or invalid username or password/pin format!"));
         } catch (SQLException | DatabaseException e) {
-            ResponseUtil.sendResponse(exchange,500,"ServerError","Internal Server Error");
+            ServerUtil.sendResponse(exchange,500,Map.of("ServerError","Internal Server Error"));
         }
     }
     private User getUserFromRequest(HttpExchange exchange) throws IOException {

@@ -2,6 +2,7 @@ package org.example.Services;
 
 import org.example.DataAccess.DataAccess;
 import org.example.models.ConnectDB;
+import org.example.models.Transaction;
 import org.example.models.User;
 import org.example.utils.Exceptions.*;
 import org.example.utils.Validators;
@@ -63,22 +64,25 @@ public class WalletService {
         }
     }
 
-    public void sendMoney(User user, User receiver, int amount)
-            throws SQLException, LowBalanceException, UserNotFoundException, DatabaseException {
+    public Transaction sendMoney(User user, User receiver, int amount)
+            throws SQLException, LowBalanceException, UserNotFoundException, DatabaseException, InvalidAmountException {
 
         if (!Validators.checkUsernameFormat(user.getUsername()) ||
                 !Validators.checkUsernameFormat(receiver.getUsername())) {
             throw new IllegalArgumentException("Invalid username format.");
         }
+        if(amount<=0){
+            throw new InvalidAmountException("Invalid amount entered!");
+        }
         try {
             conn.setAutoCommit(false);
             updateUserBalance(user, amount, false);
             updateUserBalance(receiver, amount, true);
-            this.transactionService.createTransaction(user.getUsername(), receiver.getUsername(), amount);
+            Transaction newTransaction = this.transactionService.createTransaction(user.getUsername(), receiver.getUsername(), amount);
+            return newTransaction;
         } catch (SQLException e) {
             throw new DatabaseException("Internal Server Error!");
         } finally {
-            conn.commit();
             conn.setAutoCommit(true);
         }
     }
