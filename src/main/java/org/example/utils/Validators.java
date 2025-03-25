@@ -16,4 +16,9 @@ public class Validators {
     public static boolean checkCredentialsFormat(String enteredUsername,String enteredPassword,String enteredPin){
         return checkUsernameFormat(enteredUsername)&&checkPasswordFormat(enteredPassword)&&checkPinFormat(enteredPin);
     }
+    public static boolean checkTokenFormat(String token) {
+        String regex = "^Bearer\\s(?:[\\w-]*\\.){2}[\\w-]*$";
+        return matchRegexWithString(regex, token);
+    }
+
 }

@@ -24,10 +24,11 @@ public class ServerInitializer {
         return JWTSecret;
     }
     public static Algorithm getJWTAlgorithm(){
+        loadEnvVariables();
         return Algorithm.HMAC256(getJwtSecret());
     }
 
-    private void loadEnvVariables() {
+    private static void loadEnvVariables() {
         Dotenv dotenv = Dotenv.configure().directory("src/main/resources").load();
         JWTSecret = dotenv.get("JWT_SECRET");
         if (JWTSecret == null || JWTSecret.isEmpty()) {

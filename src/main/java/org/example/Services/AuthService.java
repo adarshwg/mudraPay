@@ -35,18 +35,20 @@ public class AuthService {
     public boolean login(User user)
             throws UserNotFoundException, SQLException, DatabaseException {
         String username = user.getUsername();
-        String password = user.getHashedPassword();
-        String mudraPin = user.getPin();
-
+        String enteredPassword = user.getHashedPassword();
+        String enteredPin = user.getPin();
+        User userDetails  = userService.getUser(username);
+        String password = userDetails.getHashedPassword();
+        String mudraPin = userDetails.getPin();
         if (!Validators.checkCredentialsFormat(username, password, mudraPin)) {
             throw new IllegalArgumentException("Invalid credentials format.");
         }
-
+        System.out.println(user.getHashedPassword()+" "+password);
         try {
-            if (!user.getHashedPassword().equals(password)) {
+            if (!enteredPassword.equals(password)) {
                 throw new IllegalArgumentException("Incorrect password.");
             }
-            if (!user.getPin().equals(mudraPin)) {
+            if (!enteredPin.equals(mudraPin)) {
                 throw new IllegalArgumentException("Incorrect Mudra PIN.");
             }
             System.out.println("User logged in successfully: " + username);

@@ -11,6 +11,7 @@ public class AppConstants {
     }
     public static class DateTimeConstants {
         public static final String DATE_TIME_FORMAT_STRING= "%04d-%02d-01T00:00:00Z";
+        public static final int JWT_TTL= 30 * 60 * 1000;
     }
     public static class RouteConstants {
         public static final URI LOGIN_URI = URI.create("/login");

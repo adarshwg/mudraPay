@@ -17,22 +17,24 @@ public class Token {
             return JWT.create()
                     .withSubject("user")
                     .withClaim("username", username)
-                    .withExpiresAt(new Date(System.currentTimeMillis() + 5000L))
+                    .withExpiresAt(new Date(System.currentTimeMillis() + AppConstants.DateTimeConstants.JWT_TTL))
                     .sign(ServerInitializer.getJWTAlgorithm());
         } catch (JWTCreationException e) {
             throw new RuntimeException("Error while creating token", e);
         }
     }
 
-    public static String decodeToken(String token) {
+    public static String decodeToken(String token) throws Exceptions.InvalidTokenException {
         try {
+            System.out.println(token);
             JWTVerifier verifier = JWT.require(ServerInitializer.getJWTAlgorithm()).build();
             DecodedJWT decodedJWT = verifier.verify(token);
+            System.out.println(decodedJWT);
             Claim claim = decodedJWT.getClaim("username");
+            System.out.println("claim is "+claim);
             return claim.asString();
         } catch (JWTVerificationException e) {
-            System.out.println("Invalid token: " + e.getMessage());
-            return null;
+            throw new Exceptions.InvalidTokenException("Invalid bearer token!");
         }
     }
 }
