@@ -54,5 +54,6 @@ public class RouteInitializer {
             }
         }));
         server.createContext("/transactions/recent-contacts", new MiddlewareHandler(new GetRecentContactsHandler()));
+        server.createContext("/transactions/contact", new MiddlewareHandler(new GetContactTransactionsHelper()));
     }
 }

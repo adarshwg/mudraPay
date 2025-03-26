@@ -114,7 +114,7 @@ public class TransactionService {
         }
     }
 
-    public ArrayList<Transaction> getContactTransactions(String username, String contact, int month, int year)
+    public ArrayList<Transaction> getContactTransactions(String username, String contact, int n)
             throws SQLException, DatabaseException {
 
         if (!Validators.checkUsernameFormat(username) || !Validators.checkUsernameFormat(contact)) {
@@ -122,19 +122,13 @@ public class TransactionService {
         }
 
         try {
-            long startEpoch = Utils.getEpochTimeForMonth(year, month);
-            int nextMonth = month == 12 ? 1 : month + 1;
-            int nextYear = month == 12 ? year + 1 : year;
-            long endEpoch = Utils.getEpochTimeForMonth(nextYear, nextMonth);
-
             ArrayList<ArrayList<Object>> queryResList = DataAccess.executeQuery(
                     this.conn,
                     "transactions",
                     "*",
-                    "epochTime >= ? AND epochTime < ? AND (sender IN (?, ?) AND receiver IN (?, ?)) ORDER BY epochTime DESC",
-                    startEpoch, endEpoch, username, contact, username, contact
+                    "(sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?) ORDER BY epochTime DESC LIMIT ?",
+                    username, contact, contact, username, n
             );
-
             ArrayList<Transaction> transactions = new ArrayList<>();
             for (ArrayList<Object> row : queryResList) {
                 String transactionId = (String) row.get(0);
