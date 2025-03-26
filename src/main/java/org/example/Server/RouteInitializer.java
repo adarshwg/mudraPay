@@ -8,7 +8,7 @@ public class RouteInitializer {
 
     public static void initializeRoutes(HttpServer server) {
         server.createContext("/login", new MiddlewareHandler(new LoginHandler()));
-//        server.createContext("/signup", new MiddlewareHandler(new SignupHandler()));
+        server.createContext("/signup", new MiddlewareHandler(new SignupHandler()));
 
         // Unified handler for both GET and POST methods on /wallet
         server.createContext("/wallet", new MiddlewareHandler(exchange -> {
@@ -43,7 +43,7 @@ public class RouteInitializer {
             String method = exchange.getRequestMethod().toUpperCase();
             switch (method) {
                 case "GET":
-                    new GetWalletBalanceHandler().handle(exchange);
+                    new VerifyPinHandler().handle(exchange);
                     break;
                 case "POST":
                     new UpdatePinHandler().handle(exchange);
@@ -53,5 +53,6 @@ public class RouteInitializer {
                     exchange.getResponseBody().close();
             }
         }));
+        server.createContext("/transactions/recent-contacts", new MiddlewareHandler(new GetRecentContactsHandler()));
     }
 }

@@ -27,7 +27,7 @@ public class VerifyPinHandler implements HttpHandler {
         PinModel enteredPin = pinDetails(exchange);
         try{
             user = userService.getUser(username);
-            String pinVerification="false";
+            String pinVerification;
             if(enteredPin.enteredPin().equals(user.getHashedPassword())){
                 pinVerification="true";
             }else {
