@@ -20,7 +20,9 @@ public class MiddlewareHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         System.out.println("Middleware : Request intercepted");
+        System.out.println("came here 2");
         if(Utils.isPublicURI(exchange.getRequestURI())){
+            System.out.println("came here 1");
             nextHandler.handle(exchange);
             return;
         }

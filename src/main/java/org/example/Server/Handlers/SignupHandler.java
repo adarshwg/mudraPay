@@ -21,6 +21,7 @@ public class SignupHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        System.out.println("!11111111111");
         User user = getUserFromRequest(exchange);
         try{
             if(user ==null|| user.getUsername()==null|| user.getHashedPassword()==null|| user.getPin()==null){
@@ -32,6 +33,7 @@ public class SignupHandler implements HttpHandler {
             ServerUtil.sendResponse(exchange,400,Map.of("BadRequest","Invalid or invalid username or password/pin format!"));
         }
         try {
+            System.out.println("come here 3");
             boolean isUserAuthenticated = authService.signup(user);
             if(!isUserAuthenticated){
                 ServerUtil.sendResponse(exchange,401,Map.of("Unauthenticated","Invalid credentials!!"));

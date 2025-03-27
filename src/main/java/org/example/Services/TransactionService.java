@@ -7,7 +7,6 @@ import org.example.utils.Utils;
 import org.example.utils.Validators;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.Instant;
 import java.util.ArrayList;
 
 public class TransactionService {
@@ -35,7 +34,6 @@ public class TransactionService {
                     "(transaction_id, sender, receiver, amount, epochTime) VALUES (?, ?, ?, ?, ?)",
                     "",
                     transactionId, sender, receiver, amount, epochTime);
-
             return new Transaction(transactionId, sender, receiver, amount, epochTime);
 
         } catch (SQLException e) {
@@ -79,7 +77,7 @@ public class TransactionService {
     }
 
     public ArrayList<Transaction> getTransactionsByMonth(String username, int month, int year)
-            throws SQLException, DatabaseException {
+            throws DatabaseException {
 
         if (!Validators.checkUsernameFormat(username)) {
             throw new IllegalArgumentException("Invalid username format.");

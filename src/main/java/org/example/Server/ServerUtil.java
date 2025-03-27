@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ServerUtil {
@@ -20,6 +21,27 @@ public class ServerUtil {
 //            os.write(response.getBytes());
 //        }
 //    }
+public static Map<String, String> getQueryParams(HttpExchange exchange) {
+    Map<String, String> queryParams = new HashMap<>();
+
+    String query = exchange.getRequestURI().getQuery();  // Get the query string
+    if (query == null || query.isEmpty()) {
+        return queryParams;  // Return empty map if no query params
+    }
+
+    String[] pairs = query.split("&");  // Split by '&' to get individual key-value pairs
+
+    for (String pair : pairs) {
+        String[] keyValue = pair.split("=", 2);  // Split by '=' to separate key and value
+        if (keyValue.length == 2) {
+            queryParams.put(keyValue[0], keyValue[1]);
+        } else if (keyValue.length == 1) {
+            queryParams.put(keyValue[0], "");  // Handle cases with no value
+        }
+    }
+
+    return queryParams;
+}
 public static void sendResponse(HttpExchange exchange, int statusCode, Map<String, String> responseMap) {
     try (OutputStream os = exchange.getResponseBody()) {
         String jsonResponse = gson.toJson(responseMap);

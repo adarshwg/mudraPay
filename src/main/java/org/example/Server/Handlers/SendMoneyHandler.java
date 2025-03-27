@@ -39,7 +39,7 @@ public class SendMoneyHandler implements HttpHandler {
                     "Amount", String.valueOf(newTransaction.amount()),
                     "Remaining Balance",String.valueOf(remainingBalance)
             ));
-        } catch (SQLException | DatabaseException e) {;
+        } catch (SQLException | DatabaseException e) {
             ServerUtil.sendResponse(exchange,500,Map.of("ServerError","Internal Server Error "+ e.getMessage()));
         } catch (UserNotFoundException e) {
             ServerUtil.sendResponse(exchange,404,Map.of("NotFound","User not found!"));
@@ -47,6 +47,8 @@ public class SendMoneyHandler implements HttpHandler {
             ServerUtil.sendResponse(exchange,402,Map.of("PaymentFailed","Payment failed due to insufficient balance!!"));
         } catch (InvalidAmountException e) {
             ServerUtil.sendResponse(exchange,400,Map.of("BadRequest","Invalid amount entered!!"));
+        } catch (SelfTransferException e) {
+            ServerUtil.sendResponse(exchange,400,Map.of("BadRequest",e.getMessage()));
         }
     }
     public PaymentModel getPaymentDetails(HttpExchange exchange) throws IOException {

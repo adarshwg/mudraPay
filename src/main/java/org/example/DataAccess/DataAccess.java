@@ -1,6 +1,8 @@
 package org.example.DataAccess;
+
 import java.sql.*;
 import java.util.ArrayList;
+
 public class DataAccess {
 
     // Method to execute SELECT queries
@@ -12,14 +14,15 @@ public class DataAccess {
             setParameters(stmt, params);
             ResultSet rs = stmt.executeQuery();
             ArrayList<ArrayList<Object>> finalOutput = new ArrayList<>();
+
             while (rs.next()) {
-                ArrayList<Object> row = new ArrayList<>();   // New list for each row
+                ArrayList<Object> row = new ArrayList<>();
                 ResultSetMetaData rsMetaData = rs.getMetaData();
                 int columnsNumber = rsMetaData.getColumnCount();
                 for (int i = 1; i <= columnsNumber; i++) {
-                    row.add(rs.getObject(i));  // Add each column value to the row
+                    row.add(rs.getObject(i));
                 }
-                finalOutput.add(row);   // Add the row to the final output list
+                finalOutput.add(row);
             }
 
             return finalOutput;
@@ -29,22 +32,26 @@ public class DataAccess {
         }
     }
 
-    // Method to execute INSERT, UPDATE, or DELETE queries
-    public static int executeUpdate(Connection conn, String table, String operation, String updateClause, String condition, Object... params) throws SQLException {
-        if (!operation.equalsIgnoreCase("update") &&
-                !operation.equalsIgnoreCase("insert") &&
-                !operation.equalsIgnoreCase("delete")) {
-            throw new IllegalArgumentException("Invalid SQL operation: " + operation);
-        }
+    // Method to execute INSERT, UPDATE, DELETE, and CREATE queries
+    public static int executeUpdate(Connection conn, String table, String operation, String clause, String condition, Object... params) throws SQLException {
+        String sql;
 
-        String sql = "";
-        String s = condition.isEmpty() ? "" : " WHERE " + condition;
-        if (operation.equalsIgnoreCase("update")) {
-            sql = "UPDATE " + table + " " + updateClause + s;
-        } else if (operation.equalsIgnoreCase("insert")) {
-            sql = "INSERT INTO " + table + " " + updateClause;
-        } else if (operation.equalsIgnoreCase("delete")) {
-            sql = "DELETE FROM " + table + s;
+        // Handle different operations, including CREATE TABLE
+        switch (operation.toLowerCase()) {
+            case "insert":
+                sql = "INSERT INTO " + table + " " + clause;
+                break;
+            case "update":
+                sql = "UPDATE " + table + " " + clause + (condition.isEmpty() ? "" : " WHERE " + condition);
+                break;
+            case "delete":
+                sql = "DELETE FROM " + table + (condition.isEmpty() ? "" : " WHERE " + condition);
+                break;
+            case "create":
+                sql = "CREATE TABLE IF NOT EXISTS " + table + " " + clause;  // Backward-compatible CREATE
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid SQL operation: " + operation);
         }
 
         System.out.println("Executing SQL: " + sql);
@@ -52,6 +59,16 @@ public class DataAccess {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             setParameters(stmt, params);
             return stmt.executeUpdate();
+        }
+    }
+
+    // Helper method to create tables with dynamic SQL
+    public static void createTable(Connection conn, String tableName, String tableDefinition) throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS " + tableName + " " + tableDefinition;
+        System.out.println("Creating table: " + sql);
+
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
         }
     }
 

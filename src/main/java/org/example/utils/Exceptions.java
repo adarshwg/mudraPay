@@ -35,5 +35,11 @@ public class Exceptions {
             super(str);
         }
     }
+    public static class  SelfTransferException extends Exception{
+        public SelfTransferException (String str){
+            super(str);
+        }
+    }
+
 
 }

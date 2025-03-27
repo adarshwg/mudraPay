@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class WalletService {
     private final Connection conn;
@@ -65,11 +66,13 @@ public class WalletService {
     }
 
     public Transaction sendMoney(User user, User receiver, int amount)
-            throws SQLException, LowBalanceException, UserNotFoundException, DatabaseException, InvalidAmountException {
+            throws SQLException, LowBalanceException, UserNotFoundException, DatabaseException, InvalidAmountException, SelfTransferException {
 
         if (!Validators.checkUsernameFormat(user.getUsername()) ||
-                !Validators.checkUsernameFormat(receiver.getUsername())) {
-            throw new IllegalArgumentException("Invalid username format.");
+                !Validators.checkUsernameFormat(receiver.getUsername())||
+                Objects.equals(user.getUsername(), receiver.getUsername())
+        ) {
+            throw new SelfTransferException("Cannot transfer to your own account!.");
         }
         if(amount<=0){
             throw new InvalidAmountException("Invalid amount entered!");
@@ -79,6 +82,8 @@ public class WalletService {
             updateUserBalance(user, amount, false);
             updateUserBalance(receiver, amount, true);
             Transaction newTransaction = this.transactionService.createTransaction(user.getUsername(), receiver.getUsername(), amount);
+            conn.commit();
+            conn.setAutoCommit(true);
             return newTransaction;
         } catch (SQLException e) {
             throw new DatabaseException("Internal Server Error!");
