@@ -9,6 +9,8 @@ import org.example.utils.Exceptions.*;
 import org.example.utils.Token;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -37,7 +39,7 @@ public class LoginHandler implements HttpHandler {
             ServerUtil.sendResponse(exchange,404,Map.of("NotFound","User not found!"));
         } catch(IllegalArgumentException e){
             ServerUtil.sendResponse(exchange,400,Map.of("BadRequest","Invalid or invalid username or password/pin format!"));
-        } catch (SQLException | DatabaseException e) {
+        } catch (SQLException | DatabaseException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             ServerUtil.sendResponse(exchange,500,Map.of("ServerError","Internal Server Error"));
         }
     }

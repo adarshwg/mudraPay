@@ -9,8 +9,6 @@ public class RouteInitializer {
     public static void initializeRoutes(HttpServer server) {
         server.createContext("/login", new MiddlewareHandler(new LoginHandler()));
         server.createContext("/signup", new MiddlewareHandler(new SignupHandler()));
-
-        // Unified handler for both GET and POST methods on /wallet
         server.createContext("/wallet", new MiddlewareHandler(exchange -> {
             String method = exchange.getRequestMethod().toUpperCase();
             switch (method) {

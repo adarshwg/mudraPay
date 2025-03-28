@@ -1,11 +1,13 @@
 package org.example.Services;
-
 import org.example.DataAccess.DataAccess;
 import org.example.models.ConnectDB;
 import org.example.models.User;
+import org.example.utils.AuthHasher;
 import org.example.utils.Exceptions.*;
 import org.example.utils.Validators;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,35 +33,22 @@ public class UserService {
         return !userDataList.isEmpty();
     }
 
-    public void addUser(String username, String password, String mudraPin)
+    public void addUser(String username, String hashedPassword, String hashedMudraPin)
             throws SQLException, DatabaseException, UserAlreadyExistsException {
-
-        // ✅ Validate the username, password, and PIN before proceeding
-        if (!Validators.checkUsernameFormat(username)) {
-            throw new IllegalArgumentException("Invalid username format.");
-        }
-        if (!Validators.checkPasswordFormat(password)) {
-            throw new IllegalArgumentException("Invalid password format.");
-        }
-        if (!Validators.checkPinFormat(mudraPin)) {
-            throw new IllegalArgumentException("Invalid PIN format.");
-        }
-
         try {
             conn.setAutoCommit(false);
             if (checkIfUserExists(username)) {
                 throw new UserAlreadyExistsException("User already Exists!!");
             }
-
             DataAccess.executeUpdate(this.conn, "user", "insert",
-                    "(username, password, mudraPin) values (?, ?, ?)", "", username, password, mudraPin);
-
+                    "(username, password, mudraPin) values (?, ?, ?)", "", username, hashedPassword, hashedMudraPin);
             DataAccess.executeUpdate(this.conn, "wallet", "insert",
                     "(username, balance) values (?, ?)", "", username, 0);
-
         } catch (SQLException e) {
+            System.out.println("user adding sql error");
+            System.out.println(e.getMessage());
             conn.rollback();
-            throw new DatabaseException("Internal Server Error!");
+            throw new DatabaseException("Internal Server Error!"+e.getMessage());
         } finally {
             conn.setAutoCommit(true);
         }
@@ -74,7 +63,8 @@ public class UserService {
         try {
             userDataList = DataAccess.executeQuery(this.conn, "user", "*", "username=?", username);
         } catch (SQLException e) {
-            throw new DatabaseException("Internal Server Error!!");
+
+            throw new DatabaseException("Internal Server Error!!"+e.getMessage());
         }
 
         ArrayList<Object> userData = userDataList.getFirst();
@@ -84,14 +74,14 @@ public class UserService {
     }
 
     public void updatePassword(String username, String enteredPassword, String newPassword)
-            throws UserNotFoundException, SQLException, DatabaseException, InvalidCredentials {
+            throws UserNotFoundException, SQLException, DatabaseException, InvalidCredentials, NoSuchAlgorithmException, InvalidKeySpecException {
 
         if (!Validators.checkPasswordFormat(newPassword)) {
             throw new IllegalArgumentException("Invalid password format.");
         }
         if (verifyPassword(username, enteredPassword)) {
             DataAccess.executeUpdate(this.conn, "user", "update",
-                    "set password=?", "username=?", newPassword, username);
+                    "set password=?", "username=?", AuthHasher.hashPassword(enteredPassword), username);
             System.out.println("Password updated successfully!");
         } else {
             throw new InvalidCredentials("Incorrect current password!");
@@ -99,7 +89,7 @@ public class UserService {
     }
 
     public void updatePin(String username, String enteredPin, String newPin)
-            throws UserNotFoundException, SQLException, DatabaseException, InvalidCredentials {
+            throws UserNotFoundException, SQLException, DatabaseException, InvalidCredentials, NoSuchAlgorithmException, InvalidKeySpecException {
         System.out.println("came here aaaa");
         System.out.println(enteredPin);
         System.out.println(newPin);
@@ -111,20 +101,20 @@ public class UserService {
 
         if (verifyPin(username, enteredPin)) {
             DataAccess.executeUpdate(this.conn, "user", "update",
-                    "set mudraPin=?", "username=?", newPin, username);
+                    "set mudraPin=?", "username=?", AuthHasher.hashPassword(newPin), username);
             System.out.println("Pin updated successfully!");
         } else {
             throw new InvalidCredentials("Incorrect current password!");
         }
     }
     public boolean verifyPin(String username, String enteredPin)
-            throws UserNotFoundException, SQLException, DatabaseException {
+            throws UserNotFoundException, SQLException, DatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
         User userDetails = getUser(username);
-        return userDetails.getPin().equals(enteredPin);
+        return AuthHasher.verifyPassword(enteredPin,userDetails.getPin());
     }
     public boolean verifyPassword(String username, String enteredPassword)
-            throws UserNotFoundException, SQLException, DatabaseException {
+            throws UserNotFoundException, SQLException, DatabaseException, NoSuchAlgorithmException, InvalidKeySpecException {
         User userDetails = getUser(username);
-        return userDetails.getHashedPassword().equals(enteredPassword);
+        return AuthHasher.verifyPassword(enteredPassword,userDetails.getHashedPassword());
     }
 }

@@ -35,6 +35,7 @@ public class SignupHandler implements HttpHandler {
         try {
             System.out.println("come here 3");
             boolean isUserAuthenticated = authService.signup(user);
+            System.out.println(isUserAuthenticated);
             if(!isUserAuthenticated){
                 ServerUtil.sendResponse(exchange,401,Map.of("Unauthenticated","Invalid credentials!!"));
                 return;

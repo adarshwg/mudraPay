@@ -10,6 +10,8 @@ import org.example.models.UpdatePinModel;
 import org.example.utils.Exceptions.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -34,8 +36,8 @@ public class UpdatePinHandler implements HttpHandler {
             ServerUtil.sendResponse(exchange,500,Map.of("ServerError","Internal Server Error "+ e.getMessage()));
         } catch (InvalidCredentials e) {
             ServerUtil.sendResponse(exchange,401,Map.of("Unauthorized","Incorrect current pin!!"));
-        } catch (IOException e) {
-            System.out.println("IOE");
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+            ServerUtil.sendResponse(exchange,500,Map.of("ServerError","Internal Server Error"));
         }
     }
     private UpdatePinModel pinDetails(HttpExchange exchange) throws IOException {

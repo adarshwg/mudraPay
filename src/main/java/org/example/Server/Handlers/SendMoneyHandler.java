@@ -40,6 +40,7 @@ public class SendMoneyHandler implements HttpHandler {
                     "Remaining Balance",String.valueOf(remainingBalance)
             ));
         } catch (SQLException | DatabaseException e) {
+            System.out.println(e.getMessage());
             ServerUtil.sendResponse(exchange,500,Map.of("ServerError","Internal Server Error "+ e.getMessage()));
         } catch (UserNotFoundException e) {
             ServerUtil.sendResponse(exchange,404,Map.of("NotFound","User not found!"));

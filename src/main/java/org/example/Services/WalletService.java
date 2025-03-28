@@ -78,15 +78,13 @@ public class WalletService {
             throw new InvalidAmountException("Invalid amount entered!");
         }
         try {
-            conn.setAutoCommit(false);
             updateUserBalance(user, amount, false);
             updateUserBalance(receiver, amount, true);
             Transaction newTransaction = this.transactionService.createTransaction(user.getUsername(), receiver.getUsername(), amount);
-            conn.commit();
-            conn.setAutoCommit(true);
             return newTransaction;
         } catch (SQLException e) {
-            throw new DatabaseException("Internal Server Error!");
+            conn.rollback();
+            throw new DatabaseException("Internal server error!");
         } finally {
             conn.setAutoCommit(true);
         }
